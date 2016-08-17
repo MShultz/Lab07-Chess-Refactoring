@@ -486,16 +486,22 @@ public class Board {
 						(King) getTeamKing(!isWhite, newBoard), newBoard));
 			}
 		}
+		kingsMoves = getPossibleKingMoves(opposingMoves, kingsMoves);
+		if (isCheckmate && setCheckmate) {
+			setCheckmate(kingsMoves.size() == 0);
+			setWinner(!k.isWhite());
+		}
+		return kingsMoves.size() == 0;
+	}
+
+	private ArrayList<Position> getPossibleKingMoves(ArrayList<Position> opposingMoves,
+			ArrayList<Position> kingsMoves) {
 		for (Position pos : opposingMoves) {
 			if (kingsMoves.contains(pos)) {
 				kingsMoves.remove(pos);
 			}
 		}
-		if (isCheckmate && setCheckmate){
-			setCheckmate(kingsMoves.size() == 0);
-			setWinner(!k.isWhite());
-		}
-		return kingsMoves.size() == 0;
+		return kingsMoves;
 	}
 
 	private boolean isStalemate(boolean isWhite, Piece[][] board, boolean isCheck) {

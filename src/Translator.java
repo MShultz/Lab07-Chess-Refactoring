@@ -14,23 +14,16 @@ public class Translator {
 	Board board;
 	DirectiveHandler handler;
 	UserInterface ui;
-	boolean interactionMode = false;
+	boolean beginWithInteractionMode = false;
 
 	public Translator(String fileName, boolean containedFile) {
 		writer = new LogWriter();
 		writer.writeToFile("Process: Log file Initialized.");
 		if (containedFile) {
-			if (initializeReader(fileName)) {
-				writer.writeToFile("Process: Sucessfully opened file [" + fileName + "]");
-
-			} else {
-				writer.writeToFile(
-						"Error: There was a problem with the file you entered. Reverting to Interaction Mode.");
-				interactionMode = true;
-			}
+			initializeReader(fileName);
 		} else {
 			writer.writeToFile("Process: You entered no filepath. The program will now revert to Interaction Mode.");
-			interactionMode = true;
+			beginWithInteractionMode = true;
 		}
 		format = new OutputFormatter();
 		finder = new DirectiveFinder();
@@ -40,22 +33,24 @@ public class Translator {
 	}
 
 	public void translate() {
-		if (!interactionMode) {
+		if (!beginWithInteractionMode) {
 			translateFile();
 		}
-		if (!board.isCheckmate() && !board.isInvalidCheckMove() && !board.isStalemate()) {
-			writer.writeToFile("----------------------------------");
-			writer.writeToFile("Process: Interactive Mode enabled.");
-			writer.writeToFile("----------------------------------");
-			interactionMode();
-		}
+		initiateInteractionMode();
 		endGame();
 		shutdown();
 	}
-
+private void initiateInteractionMode(){
+	if (!board.isCheckmate() && !board.isInvalidCheckMove() && !board.isStalemate()) {
+		writer.writeToFile("----------------------------------");
+		writer.writeToFile("Process: Interactive Mode enabled.");
+		writer.writeToFile("----------------------------------");
+		interactionMode();
+	}
+}
 	public void interactionMode() {
 		boolean quit = false;
-		if (interactionMode) {
+		if (beginWithInteractionMode) {
 			setUpBoard();
 		}
 		board.writeBoard();
@@ -73,7 +68,6 @@ public class Translator {
 			} else if (pieces.size() == 0 && currentPlayerKing.isCheck()) {
 				board.setCheckmate(true);
 			}
-
 			if (!board.isStalemate() && !board.isCheckmate()) {
 				ui.inform(isWhite);
 				do {
@@ -93,8 +87,8 @@ public class Translator {
 			}
 			++count;
 			board.setPostMoveChecks();
-			board.printBoardToConsole();
 		}
+		board.printBoardToConsole();
 	}
 
 	private void getCompleteMovementAndProcess(ArrayList<Piece> pieces, int piece, ArrayList<Position> possibleMoves,
@@ -177,16 +171,17 @@ public class Translator {
 		}
 	}
 
-	private boolean initializeReader(String fileName) {
+	private void initializeReader(String fileName) {
 		FileInputStream inputStream;
-		boolean successful = true;
 		try {
 			inputStream = new FileInputStream(fileName);
 			file = new BufferedReader(new InputStreamReader(inputStream));
+			writer.writeToFile("Process: Sucessfully opened file [" + fileName + "]");
 		} catch (FileNotFoundException e) {
-			successful = false;
+			writer.writeToFile(
+					"Error: There was a problem with the file you entered. Reverting to Interaction Mode.");
+			beginWithInteractionMode = true;
 		}
-		return successful;
 	}
 
 	private String getCurrentLine() {
