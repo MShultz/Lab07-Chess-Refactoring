@@ -19,12 +19,12 @@ public class Board {
 		isCheckmate = isStalemate = false;
 	}
 
-	public boolean isShouldBeStaleMateDirective() {
+	public boolean stalemateRequired() {
 		return stalemateRequired;
 	}
 
-	public void setShouldBeStaleMateDirective(boolean shouldBeStaleMateDirective) {
-		this.stalemateRequired = shouldBeStaleMateDirective;
+	public void setStalemateRequired(boolean staleMateRequired) {
+		this.stalemateRequired = staleMateRequired;
 	}
 
 	public boolean isInvalidCheckMove() {
@@ -104,9 +104,9 @@ public class Board {
 						if (!opponentInCheck && (!placement.contains("+"))
 								|| (opponentInCheck && (placement.contains("+") || opponentInCheck
 										&& placement.contains("#") && isCheckmate(!isWhite, checker, true)))) {
-							if ((validStalemate && isShouldBeStaleMateDirective())
-									|| (validStalemate && !isShouldBeStaleMateDirective())
-									|| (!validStalemate && !isShouldBeStaleMateDirective())) {
+							if ((validStalemate && stalemateRequired())
+									|| (validStalemate && !stalemateRequired())
+									|| (!validStalemate && !stalemateRequired())) {
 								p.setHasMoved();
 								board = moveSinglePiece(position1, position2, board, p);
 								sucessfulMove = true;
@@ -378,8 +378,7 @@ public class Board {
 		Position prev = p.getCurrentPosition();
 		while (allowableMoves.hasNext()) {
 			Position pos = allowableMoves.next();
-			checker[p.getCurrentPosition().getRank()][p.getCurrentPosition().getFile()] = null;
-			checker[pos.getRank()][pos.getFile()] = p;
+			checker = moveSinglePiece(p.getCurrentPosition(), pos, checker, p);
 			if (p.getType() == PieceType.KING) {
 				k.setCurrentPosition(pos);
 			}
@@ -394,7 +393,6 @@ public class Board {
 				}
 			}
 		}
-		if (prev != p.getCurrentPosition())
 			p.setCurrentPosition(prev);
 		return allMoves;
 	}
@@ -473,9 +471,7 @@ public class Board {
 		ArrayList<Position> opposingMoves = new ArrayList<Position>();
 		for (Piece p : opposingTeam) {
 			for (Position pos : kingsMoves) {
-				Piece[][] newBoard = copyArray(board);
-				newBoard[k.getCurrentPosition().getRank()][k.getCurrentPosition().getFile()] = null;
-				newBoard[pos.getRank()][pos.getFile()] = k;
+				Piece[][] newBoard = moveSinglePiece(k.getCurrentPosition(), pos, copyArray(board), k);
 				opposingMoves.addAll(getNonCheckMovements(p.getMovement(newBoard, true), p,
 						(King) getTeamKing(!isWhite, newBoard), newBoard));
 			}

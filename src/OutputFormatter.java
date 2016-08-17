@@ -120,7 +120,7 @@ public class OutputFormatter {
 			invalid += "This move did not contain check as the directive stated.";
 		} else if (placement.contains("#")) {
 			invalid += "This move was not checkmate as the directive stated";
-		} else if (board.isShouldBeStaleMateDirective()) {
+		} else if (board.stalemateRequired()) {
 			invalid += "A single line with a valid move signified a possible stalemate; there was none.";
 		} else {
 			invalid += "The " + board.getPiece(position1).getType().toString().toLowerCase()

@@ -50,7 +50,7 @@ public class DirectiveFinder {
 		Position position2 = new Position(handler.getSecondaryRank(movement), handler.getSecondaryFile(movement));
 		char piece = handler.getPieceChar(movement);
 		boolean valid = board.isValid(position1, position2, true, movement, piece);
-		board.setShouldBeStaleMateDirective(valid);
+		board.setStalemateRequired(valid);
 		return valid;
 	}
 
