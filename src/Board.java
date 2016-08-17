@@ -8,7 +8,7 @@ public class Board {
 	private boolean isStalemate;
 	private boolean winner;
 	private boolean invalidCheckMove = false;
-	private boolean shouldBeStaleMateDirective = false;
+	private boolean stalemateRequired = false;
 	LogWriter writer;
 	DirectiveHandler handler;
 
@@ -20,11 +20,11 @@ public class Board {
 	}
 
 	public boolean isShouldBeStaleMateDirective() {
-		return shouldBeStaleMateDirective;
+		return stalemateRequired;
 	}
 
 	public void setShouldBeStaleMateDirective(boolean shouldBeStaleMateDirective) {
-		this.shouldBeStaleMateDirective = shouldBeStaleMateDirective;
+		this.stalemateRequired = shouldBeStaleMateDirective;
 	}
 
 	public boolean isInvalidCheckMove() {
@@ -158,42 +158,7 @@ public class Board {
 		return valid;
 	}
 
-	public void writeBoard() {
-		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
-			String boardString = "";
-			for (int j = 0; j < BOARD_SIZE; ++j) {
-				if (j == 0) {
-					boardString += (i + 1) + "|" + getPieceStringForBoard(i, j);
-				} else {
-					boardString += "|" + getPieceStringForBoard(i, j);
-				}
-				if (j == 7) {
-					boardString += "|";
-					writer.writeToFile(boardString);
-				}
-			}
-		}
-		writer.writeToFile("  A B C D E F G H ");
-	}
-
-	public void printBoardToConsole() {
-		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
-			String boardString = "";
-			for (int j = 0; j < BOARD_SIZE; ++j) {
-				if (j == 0) {
-					boardString += (i + 1) + "|" + getPieceStringForBoard(i, j);
-				} else {
-					boardString += "|" + getPieceStringForBoard(i, j);
-				}
-				if (j == 7) {
-					boardString += "|";
-					System.out.println(boardString);
-				}
-			}
-		}
-		System.out.println("  A B C D E F G H ");
-	}
-
+	
 	private String getPieceStringForBoard(int y, int x) {
 		Piece p = board[y][x];
 		return (p == null ? " " : (p.isWhite() ? "" + p.getType().getWhiteType() : "" + p.getType().getBlackType()));
@@ -301,8 +266,6 @@ public class Board {
 		return found;
 	}
 
-	// *****************************************************************************//
-
 	public ArrayList<Piece> getAllPossiblePieces(boolean isWhite) {
 		ArrayList<Piece> possiblePieces = new ArrayList<Piece>();
 		for (Piece[] p : board) {
@@ -350,8 +313,6 @@ public class Board {
 		return playable;
 	}
 
-	// *****************************************************************************//
-
 	public boolean isCheck(Piece[][] board, Piece pieceMoved, King king) {
 		ArrayList<Position> possibleMoves = pieceMoved.getMovement(board, true);
 		boolean isCheck = false;
@@ -393,9 +354,7 @@ public class Board {
 		Position prev = p.getCurrentPosition();
 		while (allowableMoves.hasNext()) {
 			Position pos = allowableMoves.next();
-			Piece[][] checker = copyArray(board);
-			checker[p.getCurrentPosition().getRank()][p.getCurrentPosition().getFile()] = null;
-			checker[pos.getRank()][pos.getFile()] = p;
+			Piece[][] checker = moveSinglePiece(p.getCurrentPosition(), pos, copyArray(board), p);
 			if (p.getType() == PieceType.KING) {
 				k.setCurrentPosition(pos);
 			}
@@ -410,7 +369,6 @@ public class Board {
 				}
 			}
 		}
-		if (prev != p.getCurrentPosition())
 			p.setCurrentPosition(prev);
 		return allMoves;
 	}
@@ -537,4 +495,41 @@ public class Board {
 		ArrayList<Piece> possiblePieces = getAllPossiblePieces(!isWhite, board);
 		return possiblePieces.size() == 0 && !isCheck;
 	}
+	
+	public void writeBoard() {
+		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
+			String boardString = "";
+			for (int j = 0; j < BOARD_SIZE; ++j) {
+				if (j == 0) {
+					boardString += (i + 1) + "|" + getPieceStringForBoard(i, j);
+				} else {
+					boardString += "|" + getPieceStringForBoard(i, j);
+				}
+				if (j == 7) {
+					boardString += "|";
+					writer.writeToFile(boardString);
+				}
+			}
+		}
+		writer.writeToFile("  A B C D E F G H ");
+	}
+
+	public void printBoardToConsole() {
+		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
+			String boardString = "";
+			for (int j = 0; j < BOARD_SIZE; ++j) {
+				if (j == 0) {
+					boardString += (i + 1) + "|" + getPieceStringForBoard(i, j);
+				} else {
+					boardString += "|" + getPieceStringForBoard(i, j);
+				}
+				if (j == 7) {
+					boardString += "|";
+					System.out.println(boardString);
+				}
+			}
+		}
+		System.out.println("  A B C D E F G H ");
+	}
+
 }
