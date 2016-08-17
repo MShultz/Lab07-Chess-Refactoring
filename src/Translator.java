@@ -302,11 +302,9 @@ public class Translator {
 			movement += Character.toLowerCase(ui.getFileLetter(position.getFile()));
 			movement += (position.getRank() + 1);
 			piece.setCurrentPosition(position);
-			if (board.isCheck(getBoardWithMovement(piecePosition, position), piece,
+			if (board.isCheck(board.fauxMovePiece(piecePosition, position, board.copyArray(board.getBoard()),piece), piece,
 					(King) board.getTeamKing(!piece.isWhite(), currentBoard))) {
-				Piece[][] checkBoard = board.copyArray(currentBoard);
-				checkBoard[piece.getCurrentPosition().getRank()][piece.getCurrentPosition().getFile()] = null;
-				checkBoard[position.getRank()][position.getFile()] = piece;
+				Piece[][] checkBoard = board.fauxMovePiece(piece.getCurrentPosition(), position, board.copyArray(currentBoard), piece);
 				if (board.isCheckmate(!piece.isWhite(), checkBoard, false)) {
 					movement += "#";
 				} else {
@@ -316,14 +314,6 @@ public class Translator {
 			piece.setCurrentPosition(piecePosition);
 		}
 		return movement;
-	}
-
-	private Piece[][] getBoardWithMovement(Position pos1, Position pos2) {
-		Piece[][] newBoard = board.copyArray(board.getBoard());
-		Piece p = newBoard[pos1.getRank()][pos1.getFile()];
-		newBoard[pos1.getRank()][pos1.getFile()] = null;
-		newBoard[pos2.getRank()][pos2.getFile()] = p;
-		return newBoard;
 	}
 	
 	private void endGame(){

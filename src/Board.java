@@ -84,9 +84,7 @@ public class Board {
 				Piece p = getPiece(position1);
 				if (isValidPieceMovement(handler.isCapture(placement), p, position2)) {
 					Position originalPosition = p.getCurrentPosition();
-					Piece[][] checker = copyArray(board);
-					checker[position1.getRank()][position1.getFile()] = null;
-					checker[position2.getRank()][position2.getFile()] = p;
+					Piece[][] checker = fauxMovePiece(position1, position2, copyArray(board), p);
 					p.setCurrentPosition(position2);
 					King teamKing = (King) getTeamKing(isWhite, board);
 					if (isCheck(teamKing)) {
@@ -128,6 +126,11 @@ public class Board {
 			}
 		}
 		return sucessfulMove;
+	}
+	public Piece[][] fauxMovePiece(Position pos1, Position pos2, Piece[][] copiedBoard, Piece p){
+		copiedBoard[pos1.getRank()][pos1.getFile()] = null;
+		copiedBoard[pos2.getRank()][pos2.getFile()] = p;
+		return copiedBoard;
 	}
 
 	public void castle(boolean isWhite, String castle) {
