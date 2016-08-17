@@ -302,9 +302,9 @@ public class Translator {
 			movement += Character.toLowerCase(ui.getFileLetter(position.getFile()));
 			movement += (position.getRank() + 1);
 			piece.setCurrentPosition(position);
-			if (board.isCheck(board.fauxMovePiece(piecePosition, position, board.copyArray(board.getBoard()),piece), piece,
+			if (board.isCheck(board.moveSinglePiece(piecePosition, position, board.copyArray(board.getBoard()),piece), piece,
 					(King) board.getTeamKing(!piece.isWhite(), currentBoard))) {
-				Piece[][] checkBoard = board.fauxMovePiece(piece.getCurrentPosition(), position, board.copyArray(currentBoard), piece);
+				Piece[][] checkBoard = board.moveSinglePiece(piece.getCurrentPosition(), position, board.copyArray(currentBoard), piece);
 				if (board.isCheckmate(!piece.isWhite(), checkBoard, false)) {
 					movement += "#";
 				} else {

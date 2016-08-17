@@ -84,7 +84,7 @@ public class Board {
 				Piece p = getPiece(position1);
 				if (isValidPieceMovement(handler.isCapture(placement), p, position2)) {
 					Position originalPosition = p.getCurrentPosition();
-					Piece[][] checker = fauxMovePiece(position1, position2, copyArray(board), p);
+					Piece[][] checker = moveSinglePiece(position1, position2, copyArray(board), p);
 					p.setCurrentPosition(position2);
 					King teamKing = (King) getTeamKing(isWhite, board);
 					if (isCheck(teamKing)) {
@@ -108,9 +108,8 @@ public class Board {
 							if ((validStalemate && isShouldBeStaleMateDirective())
 									|| (validStalemate && !isShouldBeStaleMateDirective())
 									|| (!validStalemate && !isShouldBeStaleMateDirective())) {
-								board[position1.getRank()][position1.getFile()] = null;
 								p.setHasMoved();
-								board[position2.getRank()][position2.getFile()] = p;
+								board = moveSinglePiece(position1, position2, board, p);								
 								sucessfulMove = true;
 								if (opponentInCheck){
 									opponentKing.setCheck(opponentInCheck);
@@ -127,10 +126,10 @@ public class Board {
 		}
 		return sucessfulMove;
 	}
-	public Piece[][] fauxMovePiece(Position pos1, Position pos2, Piece[][] copiedBoard, Piece p){
-		copiedBoard[pos1.getRank()][pos1.getFile()] = null;
-		copiedBoard[pos2.getRank()][pos2.getFile()] = p;
-		return copiedBoard;
+	public Piece[][] moveSinglePiece(Position pos1, Position pos2, Piece[][] updatedBoard, Piece p){
+		updatedBoard[pos1.getRank()][pos1.getFile()] = null;
+		updatedBoard[pos2.getRank()][pos2.getFile()] = p;
+		return updatedBoard;
 	}
 
 	public void castle(boolean isWhite, String castle) {
