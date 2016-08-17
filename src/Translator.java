@@ -66,7 +66,6 @@ public class Translator {
 			int piece;
 			boolean pieceChosen;
 			isWhite = (count % 2 != 0);
-
 			ArrayList<Piece> pieces = board.getAllPossiblePieces(isWhite);
 			King currentPlayerKing = (King) board.getTeamKing(isWhite, board.getBoard());
 			if (pieces.size() == 0 && !currentPlayerKing.isCheck()) {
@@ -80,43 +79,53 @@ public class Translator {
 				do {
 					pieceChosen = true;
 					piece = ui.determinePiece(pieces);
-					if (piece == 0) {
-						quit = true;
-					} else {
-						Piece current = pieces.get(piece - 1);
-						ArrayList<Position> possibleMoves = current.getMovement(board.getBoard(),
-								(current.getType() == PieceType.PAWN ? false : true));
-						possibleMoves = board.getNonCheckMovements(possibleMoves, current,
-								(King) board.getTeamKing(current.isWhite(), board.getBoard()));
-						if (current.getType() == PieceType.KING || current.getType() == PieceType.ROOK) {
-							if (board.isValidCastle("O-O-O", isWhite)
-									&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, false)))
-								possibleMoves.add(new Position(-1, -1));
-							if (board.isValidCastle("O-O", isWhite)
-									&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, true)))
-								possibleMoves.add(new Position(8, 8));
-						}
+					quit = isQuit(piece);
+					if (!quit) {
+						ArrayList<Position> possibleMoves = getAllMovesForPiece(pieces, piece, isWhite);
 						board.printBoardToConsole();
 						int move = ui.determineMove(possibleMoves);
-						if (move == 0) {
-							quit = true;
-						} else if (move == 1) {
-							pieceChosen = false;
-						} else {
-							String movement = getCompleteMovement(pieces.get(piece - 1), possibleMoves.get(move - 2));
-							if (movement.contains("O")) {
-								board.castle(isWhite, movement);
-								writer.writeToFile(format.formatCastle(movement, isWhite));
-							} else
-								processMovement(movement, isWhite);
-						}
+						quit = isQuit(move);
+						pieceChosen = !(move == 1);
+						if (pieceChosen && !quit)
+							getCompleteMovementAndProcess(pieces, piece, possibleMoves, move, isWhite);
 					}
 				} while (!pieceChosen);
 			}
-			board.setPostMoveChecks();
 			++count;
+			board.setPostMoveChecks();
 			board.printBoardToConsole();
 		}
+	}
+
+	private void getCompleteMovementAndProcess(ArrayList<Piece> pieces, int piece, ArrayList<Position> possibleMoves,
+			int move, boolean isWhite) {
+		String movement = getCompleteMovement(pieces.get(piece - 1), possibleMoves.get(move - 2));
+		if (movement.contains("O")) {
+			board.castle(isWhite, movement);
+			writer.writeToFile(format.formatCastle(movement, isWhite));
+		} else
+			processMovement(movement, isWhite);
+	}
+
+	private ArrayList<Position> getAllMovesForPiece(ArrayList<Piece> pieces, int piece, boolean isWhite) {
+		Piece current = pieces.get(piece - 1);
+		ArrayList<Position> possibleMoves = current.getMovement(board.getBoard(),
+				(current.getType() == PieceType.PAWN ? false : true));
+		possibleMoves = board.getNonCheckMovements(possibleMoves, current,
+				(King) board.getTeamKing(current.isWhite(), board.getBoard()));
+		if (current.getType() == PieceType.KING || current.getType() == PieceType.ROOK) {
+			if (board.isValidCastle("O-O-O", isWhite)
+					&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, false)))
+				possibleMoves.add(new Position(-1, -1));
+			if (board.isValidCastle("O-O", isWhite)
+					&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, true)))
+				possibleMoves.add(new Position(8, 8));
+		}
+		return possibleMoves;
+	}
+
+	private boolean isQuit(int choice) {
+		return choice == 0;
 	}
 
 	private void setUpBoard() {

@@ -207,10 +207,8 @@ public class Board {
 	}
 
 	public Position getRookPosition(boolean isWhite, boolean isKingSide) {
-		Position rookPos;
-		rookPos = (isWhite ? (isKingSide ? new Position(0, 7) : new Position(0, 0))
+		return (isWhite ? (isKingSide ? new Position(0, 7) : new Position(0, 0))
 				: (isKingSide ? new Position(7, 7) : new Position(7, 0)));
-		return rookPos;
 	}
 
 	private Rook getRook(boolean isWhite, boolean isKingSide) {
@@ -493,9 +491,10 @@ public class Board {
 				kingsMoves.remove(pos);
 			}
 		}
-		setCheckmate(kingsMoves.size() == 0);
-		if (isCheckmate && setCheckmate)
+		if (isCheckmate && setCheckmate){
+			setCheckmate(kingsMoves.size() == 0);
 			setWinner(!k.isWhite());
+		}
 		return kingsMoves.size() == 0;
 	}
 
