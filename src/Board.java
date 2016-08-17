@@ -77,53 +77,66 @@ public class Board {
 		Position position1 = new Position(handler.getInitialRank(placement, true),
 				handler.getInitialFile(placement, true));
 		Position position2 = new Position(handler.getSecondaryRank(placement), handler.getSecondaryFile(placement));
-
-		if (board[position1.getRank()][position1.getFile()] != null) {
-			if (isValid(position1, position2, isWhite, placement, piece)) {
-				Piece p = getPiece(position1);
-				if (isValidPieceMovement(handler.isCapture(placement), p, position2)) {
-					Position originalPosition = p.getCurrentPosition();
-					Piece[][] checker = moveSinglePiece(position1, position2, copyArray(board), p);
-					p.setCurrentPosition(position2);
-					King teamKing = (King) getTeamKing(isWhite, board);
-					if (isCheck(teamKing)) {
-						boolean nowCheck = false;
-						for (Piece opposing : getTeam(!isWhite, checker)) {
-							if (isCheck(checker, opposing, (King) getTeamKing(isWhite, checker)))
-								nowCheck = true;
-						}
-						if (nowCheck) {
-							setInvalidCheckMove(true);
-							setWinner(!isWhite);
-						}
-					}
-					if (!isInvalidCheckMove()) {
-						King opponentKing = (King) getTeamKing(!isWhite, checker);
-						boolean validStalemate = isStalemate(isWhite, checker, opponentKing.isCheck());
-						boolean opponentInCheck = isCheck(checker, p, opponentKing);
-						if (!opponentInCheck && (!placement.contains("+"))
-								|| (opponentInCheck && (placement.contains("+") || opponentInCheck
-										&& placement.contains("#") && isCheckmate(!isWhite, checker, true)))) {
-							if ((validStalemate && stalemateRequired())
-									|| (validStalemate && !stalemateRequired())
-									|| (!validStalemate && !stalemateRequired())) {
-								p.setHasMoved();
-								board = moveSinglePiece(position1, position2, board, p);
-								sucessfulMove = true;
-								if (opponentInCheck) {
-									opponentKing.setCheck(opponentInCheck);
-								} else if (validStalemate) {
-									setStalemate(true);
-								}
-							}
-						}
-					} else {
-						p.setCurrentPosition(originalPosition);
-					}
-				}
+		Piece p = getPiece(position1);
+		if (isOccupied(position1) && (isValid(position1, position2, isWhite, placement, piece))
+				&& (isValidPieceMovement(handler.isCapture(placement), p, position2))) {
+			Position originalPosition = p.getCurrentPosition();
+			Piece[][] checker = moveSinglePiece(position1, position2, copyArray(board), p);
+			p.setCurrentPosition(position2);
+			King teamKing = (King) getTeamKing(isWhite, board);
+			if (isCheck(teamKing) && movementMadeCheck(isWhite, checker)) {
+				setInvalidCheckMove(true);
+				setWinner(!isWhite);
+			}
+			if (!isInvalidCheckMove()) {
+				move(isWhite, checker, p, placement, position1, position2);
+				sucessfulMove = true;
+			} else {
+				p.setCurrentPosition(originalPosition);
 			}
 		}
 		return sucessfulMove;
+	}
+
+	private void move(boolean isWhite, Piece[][] checker, Piece p, String placement, Position position1,
+			Position position2) {
+		King opponentKing = (King) getTeamKing(!isWhite, checker);
+		boolean validStalemate = isStalemate(isWhite, checker, opponentKing.isCheck());
+		boolean opponentInCheck = isCheck(checker, p, opponentKing);
+		if (isCheckWithProperNotation(opponentInCheck, placement, isWhite, checker)
+				&& areProperStalemateFields(validStalemate)) {
+			p.setHasMoved();
+			board = moveSinglePiece(position1, position2, board, p);
+			handleCheckandStalemate(opponentKing, opponentInCheck, validStalemate);
+		}
+	}
+
+	private boolean movementMadeCheck(boolean isWhite, Piece[][] checker) {
+		boolean nowCheck = false;
+		for (Piece opposing : getTeam(!isWhite, checker)) {
+			if (isCheck(checker, opposing, (King) getTeamKing(isWhite, checker)))
+				nowCheck = true;
+		}
+		return nowCheck;
+	}
+
+	private boolean areProperStalemateFields(boolean validStalemate) {
+		return ((validStalemate && stalemateRequired()) || (validStalemate && !stalemateRequired())
+				|| (!validStalemate && !stalemateRequired()));
+	}
+
+	private boolean isCheckWithProperNotation(boolean opponentInCheck, String placement, boolean isWhite,
+			Piece[][] checker) {
+		return (!opponentInCheck && (!placement.contains("+")) || (opponentInCheck && (placement.contains("+")
+				|| opponentInCheck && placement.contains("#") && isCheckmate(!isWhite, checker, true))));
+	}
+
+	private void handleCheckandStalemate(King opponentKing, boolean opponentInCheck, boolean validStalemate) {
+		if (opponentInCheck) {
+			opponentKing.setCheck(opponentInCheck);
+		} else if (validStalemate) {
+			setStalemate(true);
+		}
 	}
 
 	public Piece[][] moveSinglePiece(Position pos1, Position pos2, Piece[][] updatedBoard, Piece p) {
@@ -158,7 +171,6 @@ public class Board {
 		return valid;
 	}
 
-	
 	private String getPieceStringForBoard(int y, int x) {
 		Piece p = board[y][x];
 		return (p == null ? " " : (p.isWhite() ? "" + p.getType().getWhiteType() : "" + p.getType().getBlackType()));
@@ -369,7 +381,7 @@ public class Board {
 				}
 			}
 		}
-			p.setCurrentPosition(prev);
+		p.setCurrentPosition(prev);
 		return allMoves;
 	}
 
@@ -393,7 +405,7 @@ public class Board {
 				}
 			}
 		}
-			p.setCurrentPosition(prev);
+		p.setCurrentPosition(prev);
 		return allMoves;
 	}
 
@@ -491,7 +503,7 @@ public class Board {
 		ArrayList<Piece> possiblePieces = getAllPossiblePieces(!isWhite, board);
 		return possiblePieces.size() == 0 && !isCheck;
 	}
-	
+
 	public void writeBoard() {
 		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
 			String boardString = "";
