@@ -231,32 +231,24 @@ public class Board {
 
 	private Position getRookPosition(boolean isWhite, boolean isKingSide) {
 		Position rookPos;
-		if (isWhite) {
-			rookPos = (isKingSide ? new Position(0, 7) : new Position(0, 0));
-		} else {
-			rookPos = (isKingSide ? new Position(7, 7) : new Position(7, 0));
-		}
+		rookPos = (isWhite ? (isKingSide ? new Position(0, 7) : new Position(0, 0))
+				: (isKingSide ? new Position(7, 7) : new Position(7, 0)));
 		return rookPos;
+	}
+
+	private Rook getRook(boolean isWhite, boolean isKingSide) {
+		Position rookPos = getRookPosition(isWhite, isKingSide);
+		Rook rook = (Rook) board[rookPos.getRank()][rookPos.getFile()];
+		board[rookPos.getRank()][rookPos.getFile()] = null;
+		return rook;
 	}
 
 	private Position getKingPosition(boolean isWhite) {
 		return (isWhite ? new Position(0, 4) : new Position(7, 4));
 	}
 
-	private Rook getRook(boolean isWhite, boolean isKingSide) {
-		Position rookPos;
-		if (isWhite) {
-			rookPos = (isKingSide ? new Position(0, 7) : new Position(0, 0));
-		} else {
-			rookPos = (isKingSide ? new Position(7, 7) : new Position(7, 0));
-		}
-		Rook rook = (Rook) board[rookPos.getRank()][rookPos.getFile()];
-		board[rookPos.getRank()][rookPos.getFile()] = null;
-		return rook;
-	}
-
 	private King getKing(boolean isWhite) {
-		Position kingPos = (isWhite ? new Position(0, 4) : new Position(7, 4));
+		Position kingPos = getKingPosition(isWhite);
 		King king = (King) board[kingPos.getRank()][kingPos.getFile()];
 		board[kingPos.getRank()][kingPos.getFile()] = null;
 		return king;
