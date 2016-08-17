@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
 public class Board {
 	private final static int BOARD_SIZE = 8;
 	private Piece[][] board;
@@ -109,11 +108,11 @@ public class Board {
 									|| (validStalemate && !isShouldBeStaleMateDirective())
 									|| (!validStalemate && !isShouldBeStaleMateDirective())) {
 								p.setHasMoved();
-								board = moveSinglePiece(position1, position2, board, p);								
+								board = moveSinglePiece(position1, position2, board, p);
 								sucessfulMove = true;
-								if (opponentInCheck){
+								if (opponentInCheck) {
 									opponentKing.setCheck(opponentInCheck);
-								}else if(validStalemate){
+								} else if (validStalemate) {
 									setStalemate(true);
 								}
 							}
@@ -126,7 +125,8 @@ public class Board {
 		}
 		return sucessfulMove;
 	}
-	public Piece[][] moveSinglePiece(Position pos1, Position pos2, Piece[][] updatedBoard, Piece p){
+
+	public Piece[][] moveSinglePiece(Position pos1, Position pos2, Piece[][] updatedBoard, Piece p) {
 		updatedBoard[pos1.getRank()][pos1.getFile()] = null;
 		updatedBoard[pos2.getRank()][pos2.getFile()] = p;
 		return updatedBoard;
@@ -211,10 +211,8 @@ public class Board {
 		boolean valid = (isCorrectPiece(piece, position1, isWhiteTurn));
 		if (isOccupied(position2) && valid) {
 			valid = (isCapture(placement) && !isPlayerPiece(isWhiteTurn, position2));
-		} else if (!isOccupied(position2) && !isCapture(placement) && valid) {
-			valid = true;
 		} else {
-			valid = false;
+			valid = (!isOccupied(position2) && !isCapture(placement) && valid);
 		}
 		return valid;
 	}
@@ -440,7 +438,7 @@ public class Board {
 			for (Position teamPos : getAllMovements(opposingTeam, checker)) {
 				if (((k.getCurrentPosition().equals(teamPos) && !k.isCheck())
 						|| (k.isCheck() && (getNumChecks(k, getTeam(!k.isWhite(), checker), checker) != 0)))
-								&& !moveRemoved) {
+						&& !moveRemoved) {
 					allowableMoves.remove();
 					moveRemoved = true;
 				}
@@ -483,10 +481,10 @@ public class Board {
 		blackKing.setCheck(isCheck(blackKing));
 		int blackKingNum = blackKing.getNumChecks();
 		blackKing.setNumChecks(getNumChecks(blackKing, getTeam(true, board), board));
-		
-		if(whiteKingNum < whiteKing.getNumChecks())
+
+		if (whiteKingNum < whiteKing.getNumChecks())
 			System.out.println("White King is in check!");
-		if(blackKingNum < blackKing.getNumChecks())
+		if (blackKingNum < blackKing.getNumChecks())
 			System.out.println("Black King is in check!");
 
 	}
