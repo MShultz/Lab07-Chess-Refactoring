@@ -66,7 +66,7 @@ public class Translator {
 			int piece;
 			boolean pieceChosen;
 			isWhite = (count % 2 != 0);
-			
+
 			ArrayList<Piece> pieces = board.getAllPossiblePieces(isWhite);
 			King currentPlayerKing = (King) board.getTeamKing(isWhite, board.getBoard());
 			if (pieces.size() == 0 && !currentPlayerKing.isCheck()) {
@@ -74,7 +74,7 @@ public class Translator {
 			} else if (pieces.size() == 0 && currentPlayerKing.isCheck()) {
 				board.setCheckmate(true);
 			}
-			
+
 			if (!board.isStalemate() && !board.isCheckmate()) {
 				ui.inform(isWhite);
 				do {
@@ -89,9 +89,11 @@ public class Translator {
 						possibleMoves = board.getNonCheckMovements(possibleMoves, current,
 								(King) board.getTeamKing(current.isWhite(), board.getBoard()));
 						if (current.getType() == PieceType.KING || current.getType() == PieceType.ROOK) {
-							if (board.isValidCastle("O-O-O", isWhite))
+							if (board.isValidCastle("O-O-O", isWhite)
+									&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, false)))
 								possibleMoves.add(new Position(-1, -1));
-							if (board.isValidCastle("O-O", isWhite))
+							if (board.isValidCastle("O-O", isWhite)
+									&& current.getCurrentPosition().equals(board.getRookPosition(isWhite, true)))
 								possibleMoves.add(new Position(8, 8));
 						}
 						board.printBoardToConsole();
@@ -282,8 +284,7 @@ public class Translator {
 	private void writeMovementError(String movement, boolean isWhite) {
 		Position pos1 = new Position(handler.getInitialRank(movement, true), handler.getInitialFile(movement, true));
 		Position pos2 = new Position(handler.getSecondaryRank(movement), handler.getSecondaryFile(movement));
-		String s = format.formatInvalidMovement(board, pos1, pos2, isWhite, movement,
-				handler.getPieceChar(movement));
+		String s = format.formatInvalidMovement(board, pos1, pos2, isWhite, movement, handler.getPieceChar(movement));
 		writer.writeToFile(s);
 	}
 
@@ -302,9 +303,10 @@ public class Translator {
 			movement += Character.toLowerCase(ui.getFileLetter(position.getFile()));
 			movement += (position.getRank() + 1);
 			piece.setCurrentPosition(position);
-			if (board.isCheck(board.moveSinglePiece(piecePosition, position, board.copyArray(board.getBoard()),piece), piece,
-					(King) board.getTeamKing(!piece.isWhite(), currentBoard))) {
-				Piece[][] checkBoard = board.moveSinglePiece(piece.getCurrentPosition(), position, board.copyArray(currentBoard), piece);
+			if (board.isCheck(board.moveSinglePiece(piecePosition, position, board.copyArray(board.getBoard()), piece),
+					piece, (King) board.getTeamKing(!piece.isWhite(), currentBoard))) {
+				Piece[][] checkBoard = board.moveSinglePiece(piece.getCurrentPosition(), position,
+						board.copyArray(currentBoard), piece);
 				if (board.isCheckmate(!piece.isWhite(), checkBoard, false)) {
 					movement += "#";
 				} else {
@@ -315,14 +317,15 @@ public class Translator {
 		}
 		return movement;
 	}
-	
-	private void endGame(){
+
+	private void endGame() {
 		String gameEnding = (board.isStalemate() ? ui.informOfStalemate()
-				: board.isCheckmate() ? ui.informOfCheckmate(board.isWinner()) : board.isInvalidCheckMove()? ui.informOfInvalid() :"The game has been chosen to end.");
+				: board.isCheckmate() ? ui.informOfCheckmate(board.isWinner())
+						: board.isInvalidCheckMove() ? ui.informOfInvalid() : "The game has been chosen to end.");
 		writer.writeToFile(gameEnding);
 		System.out.println(gameEnding);
-		if(!board.isCheckmate())
-		board.writeBoard();
+		if (!board.isCheckmate())
+			board.writeBoard();
 	}
 
 }

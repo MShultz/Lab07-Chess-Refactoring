@@ -229,7 +229,7 @@ public class Board {
 		return (piece == p && isCorrect);
 	}
 
-	private Position getRookPosition(boolean isWhite, boolean isKingSide) {
+	public Position getRookPosition(boolean isWhite, boolean isKingSide) {
 		Position rookPos;
 		rookPos = (isWhite ? (isKingSide ? new Position(0, 7) : new Position(0, 0))
 				: (isKingSide ? new Position(7, 7) : new Position(7, 0)));
