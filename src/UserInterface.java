@@ -18,17 +18,17 @@ public class UserInterface {
 		}
 	}
 
-	private void promptForMove(ArrayList<Position> possibleMoves) {
+	private void promptForMove(ArrayList<Move> possibleMoves) {
 		System.out.println("0. Exit");
 		System.out.println("1. Go Back");
 		int count = 2;
-		for (Position p : possibleMoves) {
-			if(p.getFile() == -1)
+		for (Move m : possibleMoves) {
+			if(m.getTravelPosition().getFile() == -1)
 				System.out.println(count + ". castle Queen Side");
-			else if(p.getFile() == 8)
+			else if(m.getTravelPosition().getFile() == 8)
 				System.out.println(count + ". Castle King side");
 			else
-			System.out.println(count + ". " + getMoveString(p));
+			System.out.println(count + ". " + getMoveString(m));
 			++count;
 		}
 	}
@@ -64,13 +64,13 @@ public class UserInterface {
 
 	}
 
-	private void ensureMove(Position p) {
-		if(p.file == -1)
+	private void ensureMove(Move m) {
+		if(m.getTravelPosition().file == -1)
 			System.out.println("Was this your choice? Castling queen side");
-		else if(p.file == 8)
+		else if(m.getTravelPosition().file == 8)
 			System.out.println("Was this your choice? Castling king side");
 		else
-		System.out.println("Was this your choice? " + getMoveString(p));
+		System.out.println("Was this your choice? " + getMoveString(m));
 		System.out.println("0. No");
 		System.out.println("1. Yes");
 	}
@@ -82,8 +82,8 @@ public class UserInterface {
 		return piece + " on " + fileLetter + (current.getRank() + 1);
 	}
 
-	private String getMoveString(Position p) {
-		return ("" + getFileLetter(p.getFile()) + (p.getRank()+1));
+	private String getMoveString(Move m) {
+		return ("" + getFileLetter(m.getTravelPosition().getFile()) + (m.getTravelPosition().getRank()+1) + " - " + m.getType().toString());
 	}
 
 	public char getFileLetter(int file) {
@@ -113,7 +113,7 @@ public class UserInterface {
 		return piece;
 	}
 
-	public int determineMove(ArrayList<Position> moves) {
+	public int determineMove(ArrayList<Move> moves) {
 		boolean correctMove = false;
 		int move;
 		do {

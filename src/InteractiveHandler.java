@@ -20,6 +20,19 @@ public class InteractiveHandler {
 		this.process = process;
 		this.ui = ui;
 	}
+	private void setUpBoard() {
+		BufferedReader initializer;
+		try {
+			FileInputStream inputStream = new FileInputStream("src/BoardInitialization.chess");
+			initializer = new BufferedReader(new InputStreamReader(inputStream));
+			while (initializer.ready()) {
+				process.processPlacement(initializer.readLine().trim());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	public void initiateInteractionMode(boolean beganWithNewBoard) {
 		if (!board.isCheckmate() && !board.isInvalidCheckMove() && !board.isStalemate()) {
@@ -41,7 +54,7 @@ public class InteractiveHandler {
 		boolean isWhite = true;
 		while (!quit && board.isPlayable() && !board.isStalemate() && !board.isCheckmate()) {
 			int piece;
-			boolean pieceChosen;
+			boolean pieceChosen = true;
 			isWhite = (count % 2 != 0);
 			ArrayList<Piece> pieces = board.getAllPossiblePieces(isWhite);
 			King currentPlayerKing = (King) board.getTeamKing(isWhite, board.getBoard());
@@ -53,11 +66,10 @@ public class InteractiveHandler {
 			if (!board.isStalemate() && !board.isCheckmate()) {
 				ui.inform(isWhite);
 				do {
-					pieceChosen = true;
 					piece = ui.determinePiece(pieces);
 					quit = isQuit(piece);
 					if (!quit) {
-						ArrayList<Position> possibleMoves = getAllMovesForPiece(pieces, piece, isWhite);
+						ArrayList<Move> possibleMoves = generateMovement(getAllMovesForPiece(pieces, piece, isWhite), pieces.get(piece-1));
 						board.printBoardToConsole();
 						int move = ui.determineMove(possibleMoves);
 						quit = isQuit(move);
@@ -73,9 +85,9 @@ public class InteractiveHandler {
 		board.printBoardToConsole();
 	}
 
-	private void getCompleteMovementAndProcess(ArrayList<Piece> pieces, int piece, ArrayList<Position> possibleMoves,
+	private void getCompleteMovementAndProcess(ArrayList<Piece> pieces, int piece, ArrayList<Move> possibleMoves,
 			int move, boolean isWhite) {
-		String movement = getCompleteMovement(pieces.get(piece - 1), possibleMoves.get(move - 2));
+		String movement = getCompleteMovement(possibleMoves.get(move-2));
 		if (movement.contains("O")) {
 			board.castle(isWhite, movement);
 			writer.writeToFile(format.formatCastle(movement, isWhite));
@@ -83,20 +95,7 @@ public class InteractiveHandler {
 			process.processMovement(movement, isWhite);
 	}
 
-	private void setUpBoard() {
-		BufferedReader initializer;
-		try {
-			FileInputStream inputStream = new FileInputStream("src/BoardInitialization.chess");
-			initializer = new BufferedReader(new InputStreamReader(inputStream));
-			while (initializer.ready()) {
-				process.processPlacement(initializer.readLine().trim());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
+	
 	private boolean isQuit(int choice) {
 		return choice == 0;
 	}
@@ -118,24 +117,26 @@ public class InteractiveHandler {
 		return possibleMoves;
 	}
 
-	private String getCompleteMovement(Piece piece, Position position) {
+	private String getCompleteMovement(Move move) {
 		String movement;
-		if (position.file == -1)
+		if (move.getTravelPosition().file == -1)
 			movement = "O-O-O";
-		else if (position.file == 8)
+		else if (move.getTravelPosition().file == 8)
 			movement = "O-O";
 		else {
 			Piece[][] currentBoard = board.getBoard();
-			Position piecePosition = piece.getCurrentPosition();
+			Piece piece = move.getPiece();
+			Position currentPosition = move.getCurrentPosition();
+			Position travelPostition = move.getTravelPosition();
 			movement = "" + (piece.getType() == PieceType.PAWN ? "" : piece.getType().getWhiteType())
-					+ Character.toLowerCase(ui.getFileLetter(piecePosition.getFile())) + (piecePosition.getRank() + 1);
-			movement += (currentBoard[position.getRank()][position.getFile()] == null ? "-" : "x");
-			movement += Character.toLowerCase(ui.getFileLetter(position.getFile()));
-			movement += (position.getRank() + 1);
-			piece.setCurrentPosition(position);
-			if (board.isCheck(board.moveSinglePiece(piecePosition, position, board.copyArray(board.getBoard()), piece),
+					+ Character.toLowerCase(ui.getFileLetter(currentPosition.getFile())) + (currentPosition.getRank() + 1);
+			movement += (currentBoard[travelPostition.getRank()][travelPostition.getFile()] == null ? "-" : "x");
+			movement += Character.toLowerCase(ui.getFileLetter(travelPostition.getFile()));
+			movement += (move.getTravelPosition().getRank() + 1);
+			piece.setCurrentPosition(travelPostition);
+			if (board.isCheck(board.moveSinglePiece(currentPosition, travelPostition, board.copyArray(board.getBoard()), piece),
 					piece, (King) board.getTeamKing(!piece.isWhite(), currentBoard))) {
-				Piece[][] checkBoard = board.moveSinglePiece(piece.getCurrentPosition(), position,
+				Piece[][] checkBoard = board.moveSinglePiece(currentPosition, travelPostition,
 						board.copyArray(currentBoard), piece);
 				if (board.isCheckmate(!piece.isWhite(), checkBoard, false)) {
 					movement += "#";
@@ -143,10 +144,20 @@ public class InteractiveHandler {
 					movement += "+";
 				}
 			}
-			piece.setCurrentPosition(piecePosition);
+			piece.setCurrentPosition(currentPosition);
 		}
 		return movement;
 	}
 
+	private ArrayList<Move> generateMovement(ArrayList<Position> possibleMoves, Piece piece) {
+		ArrayList<Move> moves = new ArrayList<>();
+		for(Position pos: possibleMoves){
+			if(pos.getRank() != -1 || pos.getRank() != 8)
+			moves.add(new Move(piece, piece.getCurrentPosition(), pos, board));
+			else
+				moves.add(new Move(piece, piece.getCurrentPosition(), pos));
+		}
+		return moves;
+	}
 
 }

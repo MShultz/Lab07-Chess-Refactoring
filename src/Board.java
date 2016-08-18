@@ -97,6 +97,7 @@ public class Board {
 		}
 		return sucessfulMove;
 	}
+	
 
 	private void move(boolean isWhite, Piece[][] checker, Piece p, String placement, Position position1,
 			Position position2) {
@@ -491,7 +492,7 @@ public class Board {
 			setCheckmate(kingsMoves.size() == 0);
 			setWinner(!k.isWhite());
 		}
-		return kingsMoves.size() == 0;
+		return getAllPossiblePieces(isWhite, board).size() == 0;
 	}
 
 	private ArrayList<Position> getPossibleKingMoves(ArrayList<Position> opposingMoves,
