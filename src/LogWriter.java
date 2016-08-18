@@ -13,6 +13,7 @@ public class LogWriter {
 	public LogWriter(){
 		createFile();
 		initializeWriter();
+		writeToFile("Process: Log file Initialized.");
 	}
 	private void initializeWriter() {
 		try {
@@ -30,6 +31,12 @@ public class LogWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public void writeMovementError(String movement, boolean isWhite, DirectiveHandler handler, OutputFormatter format, Board board) {
+		Position pos1 = new Position(handler.getInitialRank(movement, true), handler.getInitialFile(movement, true));
+		Position pos2 = new Position(handler.getSecondaryRank(movement), handler.getSecondaryFile(movement));
+		String s = format.formatInvalidMovement(board, pos1, pos2, isWhite, movement, handler.getPieceChar(movement));
+		writeToFile(s);
 	}
 	public void writeToFile(String log) {
 		try {
