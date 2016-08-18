@@ -27,10 +27,11 @@ public class Game {
 	}
 	public void play(){
 		if (containedFile) {
-			interactionHandler.initiateInteractionMode(translationHandler.translateFile(process, fileName));
+			boolean beginWithInteraction = translationHandler.translateFile(process, fileName);
+			interactionHandler.initiateInteractionMode(beginWithInteraction, translationHandler.turn);
 		} else {
 			writer.writeToFile("Process: You entered no filepath. The program will now revert to Interaction Mode.");
-			interactionHandler.initiateInteractionMode(true);
+			interactionHandler.initiateInteractionMode(true, 0);
 		}
 		endGame();	
 	}

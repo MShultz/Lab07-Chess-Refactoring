@@ -13,6 +13,7 @@ public class Translator {
 	DirectiveHandler handler;
 	boolean beginWithInteractionMode = false;
 	BufferedReader file = null;
+	int turn;
 
 	public Translator(LogWriter writer, OutputFormatter format, DirectiveFinder finder, Board board, DirectiveHandler handler){
 		this.writer = writer;
@@ -32,14 +33,18 @@ public class Translator {
 						currentLine = finder.removeComment(currentLine).trim();
 					}
 					if (currentLine.trim().length() > 0) {
+						turn = 0;
 						if (finder.isPlacement(currentLine)) {
 							process.processPlacement(currentLine);
 						} else if (finder.isMovement(currentLine, board, handler)) {
 							ArrayList<String> movements = finder.getMovementDirectives(currentLine);
-							if (!board.isCheckmate() && !board.isInvalidCheckMove())
+							if (!board.isCheckmate() && !board.isInvalidCheckMove()){
 								process.processMovement(movements.get(0), true);
-							if (movements.size() > 1 && !board.isCheckmate() && !board.isInvalidCheckMove())
+								turn = 1;}
+							if (movements.size() > 1 && !board.isCheckmate() && !board.isInvalidCheckMove()){
 								process.processMovement(movements.get(1), false);
+								turn = 0;
+							}
 							wasMove = true;
 						} else if (finder.containsCastle(currentLine) && !board.isCheckmate()) {
 							process.processCastling(currentLine);

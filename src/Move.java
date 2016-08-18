@@ -38,14 +38,17 @@ public class Move {
 		piece.setCurrentPosition(travelPosition);
 		King opposingKing = (King)board.getTeamKing(!piece.isWhite(), currentBoard);
 		boolean wasCheck = opposingKing.isCheck();
-		if(board.isCheckmate(!piece.isWhite(), currentBoard, false))
-			type = MoveType.CHECKMATE;
-		else if(board.isCheck(currentBoard, piece,opposingKing))
+		
+		if(board.isCheck(currentBoard, piece,opposingKing) && board.getAllPossiblePieces(!piece.isWhite()).size() != 0)
 			type = MoveType.CHECK;
-		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] != null)
+		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] != null && !board.isCheck(currentBoard, piece,opposingKing))
 			type = MoveType.CAPTURE;
-		else
+		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] == null)
 			type = MoveType.MOVE;
+		else if(board.isCheck(currentBoard, piece,opposingKing) && board.getAllPossiblePieces(!piece.isWhite()).size() == 0)
+			type = MoveType.CHECKMATE;
+		else
+			type = MoveType.STALEMATE;
 		opposingKing.setCheck(wasCheck);
 		piece.setCurrentPosition(current);
 	}

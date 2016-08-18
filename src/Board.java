@@ -372,9 +372,9 @@ public class Board {
 			ArrayList<Piece> opposingTeam = getTeam(!p.isWhite(), checker);
 			boolean moveRemoved = false;
 			for (Position teamPos : getAllMovements(opposingTeam, checker)) {
-				if ((k.getCurrentPosition().equals(teamPos) && !k.isCheck())
-						|| (k.isCheck() && (getNumChecks(k, getTeam(!k.isWhite(), checker), checker) != 0))
-								&& !moveRemoved) {
+				if (((k.getCurrentPosition().equals(teamPos) && !k.isCheck())
+						|| (k.isCheck() && (getNumChecks(k, getTeam(!k.isWhite(), checker), checker) != 0)))
+								&& !moveRemoved){
 					allowableMoves.remove();
 					moveRemoved = true;
 				}
@@ -492,7 +492,7 @@ public class Board {
 			setCheckmate(kingsMoves.size() == 0);
 			setWinner(!k.isWhite());
 		}
-		return getAllPossiblePieces(isWhite, board).size() == 0;
+		return kingsMoves.size() == 0 && k.isCheck();
 	}
 
 	private ArrayList<Position> getPossibleKingMoves(ArrayList<Position> opposingMoves,
