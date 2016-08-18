@@ -41,14 +41,15 @@ public class Move {
 		
 		if(board.isCheck(currentBoard, piece,opposingKing) && board.getAllPossiblePieces(!piece.isWhite()).size() != 0)
 			type = MoveType.CHECK;
-		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] != null && !board.isCheck(currentBoard, piece,opposingKing))
-			type = MoveType.CAPTURE;
-		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] == null)
-			type = MoveType.MOVE;
 		else if(board.isCheck(currentBoard, piece,opposingKing) && board.getAllPossiblePieces(!piece.isWhite()).size() == 0)
 			type = MoveType.CHECKMATE;
-		else
+		else if(board.getBoard()[travelPosition.getRank()][travelPosition.getFile()] != null && !board.isCheck(currentBoard, piece,opposingKing))
+			type = MoveType.CAPTURE;
+		else if(board.isStalemate(piece.isWhite(), currentBoard, opposingKing.isCheck()))
 			type = MoveType.STALEMATE;
+		else
+			type = MoveType.MOVE;
+		
 		opposingKing.setCheck(wasCheck);
 		piece.setCurrentPosition(current);
 	}

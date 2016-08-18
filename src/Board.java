@@ -505,7 +505,7 @@ public class Board {
 		return kingsMoves;
 	}
 
-	private boolean isStalemate(boolean isWhite, Piece[][] board, boolean isCheck) {
+	public boolean isStalemate(boolean isWhite, Piece[][] board, boolean isCheck) {
 		ArrayList<Piece> possiblePieces = getAllPossiblePieces(!isWhite, board);
 		return possiblePieces.size() == 0 && !isCheck;
 	}
